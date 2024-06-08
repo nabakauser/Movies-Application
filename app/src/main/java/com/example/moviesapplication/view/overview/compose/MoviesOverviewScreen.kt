@@ -1,16 +1,22 @@
 package com.example.moviesapplication.view.overview.compose
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.example.moviesapplication.view.overview.MoviesData
 
 @Preview
@@ -39,26 +45,49 @@ fun OverviewPreview(){
                 rating = 9.0,
                 image = "images/dune3.jpg",
                 imdbUrl = "",
-            ),
-        )
+            )
+        ),
+        navigateToDetails = {},
     )
 }
 
 @Composable
 fun MoviesOverviewScreen(
     isLoading: Boolean,
-    moviesList: List<MoviesData?>,
+    moviesList: List<MoviesData?>?,
+    navigateToDetails: (MoviesData) -> Unit,
 ) {
-    Column(
-        modifier = Modifier.fillMaxSize()
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        topBar = {
+            OverviewTopBar()
+        }
     ) {
-        if(!isLoading){
-            if(moviesList.isNotEmpty()) {
-                LazyColumn{
-                    items(moviesList) {
-                        it?.let {
-                            MovieCard(moviesData = it)
+        Column(
+            modifier = Modifier
+                .padding(it)
+                .background(Color.Black)
+        ) {
+            if(!isLoading){
+                if(moviesList?.isNotEmpty() == true) {
+                    LazyColumn(
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 24.dp)
+                    ){
+                        items(moviesList) {
+                            it?.let {
+                                MovieCard(
+                                    moviesData = it,
+                                    navigateToDetails = navigateToDetails
+                                )
+                            }
                         }
+                    }
+                } else {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(text = "No movies found!")
                     }
                 }
             } else {
@@ -66,15 +95,8 @@ fun MoviesOverviewScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text(text = "No movies found!")
+                    CircularProgressIndicator()
                 }
-            }
-        } else {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center,
-            ) {
-                CircularProgressIndicator()
             }
         }
     }

@@ -8,12 +8,13 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
-class MovieDetailsViewModel(): ViewModel() {
+class MovieDetailsViewModel: ViewModel() {
     private val viewModelState = MutableStateFlow(MovieDetailsViewModelState(isLoading = true))
 
     val uiState = viewModelState
         .map { it.toUiState() }
         .stateIn(viewModelScope, SharingStarted.Eagerly, viewModelState.value.toUiState())
+
 }
 
 data class MovieDetailsViewModelState(

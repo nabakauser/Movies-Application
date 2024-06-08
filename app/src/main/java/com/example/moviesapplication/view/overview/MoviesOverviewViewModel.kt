@@ -37,11 +37,11 @@ class MoviesOverviewViewModel(
         viewModelScope.launch {
             viewModelState.update { it.copy(isLoading = true) }
             val response = repository.getMoviesList()
-            Log.d("moviesLog", "vm - ${Gson().toJson(response)}")
-            if (response?.data != null) {
+//            Log.d("moviesLog", "vm - ${Gson().toJson(response)}")
+            if (response.data != null) {
                 viewModelState.update {
                     it.copy(
-                        moviesList = mapMoviesList(response.data.take(20)),
+                        moviesList = mapMoviesList(response.data.take(15)),
                         isLoading = false,
 //                        lastUpdated = System.currentTimeMillis()
                     )
@@ -74,10 +74,10 @@ class MoviesOverviewViewModel(
                 val document = Jsoup.connect(imdbUrl).get()
                 val element = document.select("meta[property=og:image]").first()
                 url = element?.attr("content")
-                Log.d("moviesLog", "VM - imdb - $url")
+//                Log.d("moviesLog", "VM - imdb - $url")
             } catch (e: Exception) {
                 e.printStackTrace()
-                Log.d("moviesLog", "VM - excep - $e")
+//                Log.d("moviesLog", "VM - excep - $e")
             }
             url
         }
