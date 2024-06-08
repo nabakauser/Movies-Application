@@ -1,4 +1,4 @@
-package com.example.moviesapplication.overview.compose
+package com.example.moviesapplication.view.overview.compose
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,7 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.moviesapplication.overview.MoviesData
+import com.example.moviesapplication.view.overview.MoviesData
 
 @Preview
 @Composable
@@ -24,21 +24,21 @@ fun OverviewPreview(){
                 movieName = "Dune - Part I",
                 rating = 9.3,
                 image = "images/dune.jpg",
-                imageUrl = "",
+                imdbUrl = "",
             ),
             MoviesData(
                 id = 2,
                 movieName = "Dune - Part II",
                 rating = 8.7,
                 image = "images/dune2.jpg",
-                imageUrl = "",
+                imdbUrl = "",
             ),
             MoviesData(
                 id = 3,
                 movieName = "Dune - Part III",
                 rating = 9.0,
                 image = "images/dune3.jpg",
-                imageUrl = "",
+                imdbUrl = "",
             ),
         )
     )
@@ -47,7 +47,7 @@ fun OverviewPreview(){
 @Composable
 fun MoviesOverviewScreen(
     isLoading: Boolean,
-    moviesList: List<MoviesData>,
+    moviesList: List<MoviesData?>,
 ) {
     Column(
         modifier = Modifier.fillMaxSize()
@@ -56,7 +56,9 @@ fun MoviesOverviewScreen(
             if(moviesList.isNotEmpty()) {
                 LazyColumn{
                     items(moviesList) {
-                        MovieCard(moviesData = it)
+                        it?.let {
+                            MovieCard(moviesData = it)
+                        }
                     }
                 }
             } else {
