@@ -1,6 +1,5 @@
 package com.example.moviesapplication.view.details
 
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -16,7 +15,7 @@ fun MovieDetailsRoute(
     val viewModel: MovieDetailsViewModel = koinViewModel()
     val uiState by viewModel.uiState.collectAsState()
 
-    Log.d("moviesLog","r - $movieItem")
+//    Log.d("moviesLog","r - $movieItem")
     val movie = Gson().fromJson(movieItem, MoviesData::class.java)
     MovieDetailsScreen(
         movie = movie,

@@ -48,6 +48,7 @@ fun OverviewPreview(){
             )
         ),
         navigateToDetails = {},
+        onIconClicked = { _, _, _ -> },
     )
 }
 
@@ -55,6 +56,7 @@ fun OverviewPreview(){
 fun MoviesOverviewScreen(
     isLoading: Boolean,
     moviesList: List<MoviesData?>?,
+    onIconClicked:(String, String, Boolean) -> Unit,
     navigateToDetails: (MoviesData) -> Unit,
 ) {
     Scaffold(
@@ -77,6 +79,9 @@ fun MoviesOverviewScreen(
                             it?.let {
                                 MovieCard(
                                     moviesData = it,
+                                    onIconClicked = { type, isSelected ->
+                                        onIconClicked(it.movieName ?: "", type, isSelected)
+                                    },
                                     navigateToDetails = navigateToDetails
                                 )
                             }

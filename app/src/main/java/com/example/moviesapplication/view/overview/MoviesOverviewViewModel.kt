@@ -38,7 +38,7 @@ class MoviesOverviewViewModel(
             if (response.data != null) {
                 viewModelState.update {
                     it.copy(
-                        moviesList = mapMoviesList(response.data.take(15)),
+                        moviesList = mapMoviesList(response.data.take(5)),
                         isLoading = false,
                     )
                 }
@@ -76,6 +76,30 @@ class MoviesOverviewViewModel(
             url
         }
     }
+
+    fun onIconClicked(
+        movieId: String,
+        type: String,
+        isSelected: Boolean
+    ) {
+        val updatedMoviesList = viewModelState.value.moviesList?.map { movie ->
+            if (movie?.movieName == movieId) {
+                when(type){
+                    "favourite" -> movie.copy(isFavourite = !isSelected)
+                    "watchlist" -> movie.copy(isWatched = !isSelected)
+                    else -> movie
+                }
+            } else {
+                movie
+            }
+        }?.toMutableList()
+        viewModelState.update {
+            it.copy(
+                moviesList = updatedMoviesList,
+                lastUpdated = System.currentTimeMillis(),
+            )
+        }
+    }
 }
 
 data class MoviesOverviewViewModelState(
@@ -103,5 +127,7 @@ data class MoviesData(
     val movieName: String? = "",
     val rating: Double? = 0.0,
     val image: String? = "",
-    val imdbUrl: String? = ""
+    val imdbUrl: String? = "",
+    var isFavourite: Boolean = false,
+    var isWatched: Boolean = false,
 )

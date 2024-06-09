@@ -1,4 +1,4 @@
-package com.example.moviesapplication.view
+package com.example.moviesapplication.view.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavType

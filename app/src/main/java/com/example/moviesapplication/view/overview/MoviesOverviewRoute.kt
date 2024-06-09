@@ -17,6 +17,9 @@ fun MoviesOverviewRoute(
     MoviesOverviewScreen(
         isLoading = uiState.isLoading,
         moviesList = uiState.moviesList?.toList() ?: listOf(),
+        onIconClicked = { movieId, type, isSelected ->
+            viewModel.onIconClicked(movieId, type, isSelected)
+        },
         navigateToDetails = {
             val movie = Gson().toJson(it)
             navController.navigate("Details?movie=$movie")
