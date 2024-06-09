@@ -4,17 +4,26 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "Movies")
+@Entity(tableName = "MoviesTable")
 data class MoviesTableModel(
     @PrimaryKey
     val movieName: String,
 
     @ColumnInfo
-    var rating: Double?,
+    val id: Int?,
 
     @ColumnInfo
-    var image: String?,
+    val rating: Double?,
 
     @ColumnInfo
-    var imdbUrl: String?,
+    val image: String?,
+
+    @ColumnInfo
+    val imdbUrl: String?,
+
+    @ColumnInfo
+    val isFavourite: Boolean?,
+
+    @ColumnInfo
+    val isWatched: Boolean?,
 )

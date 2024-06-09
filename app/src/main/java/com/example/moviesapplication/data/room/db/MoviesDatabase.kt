@@ -6,11 +6,11 @@ import com.example.moviesapplication.data.room.table.MoviesTableModel
 
 @Database(
     entities = [MoviesTableModel::class],
-    version = 1,
-    exportSchema = false
+    version = 2,
+    exportSchema = true
 )
 
 //@TypeConverters(Convertors::class)
 abstract class MoviesDatabase: RoomDatabase() {
-    abstract fun moviesData(): MoviesDao
+    abstract fun moviesDao(): MoviesDao
 }

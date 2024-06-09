@@ -1,9 +1,11 @@
 package com.example.moviesapplication.view.overview
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.moviesapplication.data.model.MoviesResponseModel
 import com.example.moviesapplication.data.repository.MoviesRepository
+import com.example.moviesapplication.data.room.table.MoviesTableModel
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -28,7 +30,26 @@ class MoviesOverviewViewModel(
         .stateIn(viewModelScope, SharingStarted.Eagerly, viewModelState.value.toUiState())
 
     init {
-        getMoviesList()
+        checkDatabaseAndFetchMovies()
+    }
+
+    private fun checkDatabaseAndFetchMovies(){
+        viewModelScope.launch {
+            viewModelState.update { it.copy(isLoading = true) }
+            repository.getMoviesFromDb()?.collect{ movies ->
+                Log.d("moviesLog","r - $movies")
+                if(movies?.isEmpty() == true) {
+                    getMoviesList()
+                } else {
+                    viewModelState.update {
+                        it.copy(
+                            moviesList = mapMoviesListFromDb(movies),
+                            isLoading = false,
+                        )
+                    }
+                }
+            }
+        }
     }
 
     private fun getMoviesList() {
@@ -38,10 +59,11 @@ class MoviesOverviewViewModel(
             if (response.data != null) {
                 viewModelState.update {
                     it.copy(
-                        moviesList = mapMoviesList(response.data.take(5)),
+                        moviesList = mapMoviesList(response.data.take(25)),
                         isLoading = false,
                     )
                 }
+                repository.saveMoviesToDb(mapMoviesTableModel(viewModelState.value.moviesList))
             }
         }
     }
@@ -63,6 +85,35 @@ class MoviesOverviewViewModel(
         }
     }
 
+    private fun mapMoviesListFromDb(movies: List<MoviesTableModel?>?): MutableList<MoviesData?> {
+        return movies?.map { movie ->
+            MoviesData(
+                id = movie?.id,
+                movieName = movie?.movieName,
+                rating = movie?.rating,
+                image = movie?.image,
+                imdbUrl = movie?.imdbUrl,
+                isFavourite = movie?.isFavourite ?: false,
+                isWatched = movie?.isWatched ?: false
+            )
+        }?.toMutableList() ?: mutableListOf()
+    }
+    private fun mapMoviesTableModel(
+        moviesList: MutableList<MoviesData?>?
+    ): List<MoviesTableModel> {
+        return moviesList?.map { movie ->
+            MoviesTableModel(
+                id = movie?.id,
+                movieName = movie?.movieName ?: "",
+                rating = movie?.rating,
+                image = movie?.image,
+                imdbUrl = movie?.imdbUrl,
+                isFavourite = movie?.isFavourite,
+                isWatched = movie?.isWatched
+            )
+        } ?: listOf()
+    }
+
     private fun fetchImageUrlFromImdb(imdbUrl: String): Deferred<String?> {
         return viewModelScope.async(Dispatchers.IO) {
             var url: String? = null
@@ -82,20 +133,25 @@ class MoviesOverviewViewModel(
         type: String,
         isSelected: Boolean
     ) {
-        val updatedMoviesList = viewModelState.value.moviesList?.map { movie ->
-            if (movie?.movieName == movieId) {
-                when(type){
-                    "favourite" -> movie.copy(isFavourite = !isSelected)
-                    "watchlist" -> movie.copy(isWatched = !isSelected)
-                    else -> movie
+        viewModelScope.launch {
+            viewModelState.value.moviesList?.forEach { movie ->
+                if (movie?.movieName == movieId) {
+                    when (type) {
+                        "favourite" -> {
+                            movie.isFavourite = !isSelected
+                            repository.updateFavourites(movieId, !isSelected)
+                        }
+                        "watchlist" -> {
+                            movie.isWatched = !isSelected
+                            repository.updateWatchList(movieId, !isSelected)
+                        }
+                    }
                 }
-            } else {
-                movie
             }
-        }?.toMutableList()
+        }
         viewModelState.update {
             it.copy(
-                moviesList = updatedMoviesList,
+                moviesList = viewModelState.value.moviesList,
                 lastUpdated = System.currentTimeMillis(),
             )
         }
