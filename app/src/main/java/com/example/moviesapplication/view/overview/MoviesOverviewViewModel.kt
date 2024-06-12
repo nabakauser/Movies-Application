@@ -6,8 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.moviesapplication.data.model.MoviesResponseModel
 import com.example.moviesapplication.data.repository.MoviesRepository
 import com.example.moviesapplication.data.room.table.MoviesTableModel
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -17,10 +16,11 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.jsoup.Jsoup
 
 class MoviesOverviewViewModel(
-    private val repository: MoviesRepository
+    private val dispatcher: CoroutineDispatcher,
+    private val repository: MoviesRepository,
+    private val imageUrlFetcher: ImageUrlFetcher,
 ) : ViewModel() {
 
     private val viewModelState = MutableStateFlow(MoviesOverviewViewModelState(isLoading = true))
@@ -34,7 +34,7 @@ class MoviesOverviewViewModel(
     }
 
     private fun checkDatabaseAndFetchMovies(){
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcher) {
             viewModelState.update { it.copy(isLoading = true) }
             repository.getMoviesFromDb()?.collect{ movies ->
                 Log.d("moviesLog","r - $movies")
@@ -52,8 +52,8 @@ class MoviesOverviewViewModel(
         }
     }
 
-    private fun getMoviesList() {
-        viewModelScope.launch {
+    fun getMoviesList() {
+        viewModelScope.launch(dispatcher) {
             viewModelState.update { it.copy(isLoading = true) }
             val response = repository.getMoviesList()
             if (response.data != null) {
@@ -64,6 +64,13 @@ class MoviesOverviewViewModel(
                     )
                 }
                 repository.saveMoviesToDb(mapMoviesTableModel(viewModelState.value.moviesList))
+            } else {
+                viewModelState.update {
+                    it.copy(
+                        moviesList = mutableListOf(),
+                        isLoading = false,
+                    )
+                }
             }
         }
     }
@@ -72,7 +79,7 @@ class MoviesOverviewViewModel(
         return coroutineScope {
             movies?.map { movie ->
                 async {
-                    val imageUrl = movie?.imdbUrl?.let { fetchImageUrlFromImdb(it).await() }
+                    val imageUrl = movie?.imdbUrl?.let { imageUrlFetcher.fetchImageUrlFromImdb(it) }
                     MoviesData(
                         id = movie?.id,
                         movieName = movie?.movie,
@@ -114,19 +121,19 @@ class MoviesOverviewViewModel(
         } ?: listOf()
     }
 
-    private fun fetchImageUrlFromImdb(imdbUrl: String): Deferred<String?> {
-        return viewModelScope.async(Dispatchers.IO) {
-            var url: String? = null
-            try {
-                val document = Jsoup.connect(imdbUrl).get()
-                val element = document.select("meta[property=og:image]").first()
-                url = element?.attr("content")
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-            url
-        }
-    }
+//    fun fetchImageUrlFromImdb(imdbUrl: String): Deferred<String?> {
+//        return viewModelScope.async(Dispatchers.IO) {
+//            var url: String? = null
+//            try {
+//                val document = Jsoup.connect(imdbUrl).get()
+//                val element = document.select("meta[property=og:image]").first()
+//                url = element?.attr("content")
+//            } catch (e: Exception) {
+//                e.printStackTrace()
+//            }
+//            url
+//        }
+//    }
 
     fun onIconClicked(
         movieId: String,
@@ -139,11 +146,11 @@ class MoviesOverviewViewModel(
                     when (type) {
                         "favourite" -> {
                             movie.isFavourite = !isSelected
-                            repository.updateFavourites(movieId, !isSelected)
+                            repository.updateFavouritesToDb(movieId, !isSelected)
                         }
                         "watchlist" -> {
                             movie.isWatched = !isSelected
-                            repository.updateWatchList(movieId, !isSelected)
+                            repository.updateWatchListToDb(movieId, !isSelected)
                         }
                     }
                 }

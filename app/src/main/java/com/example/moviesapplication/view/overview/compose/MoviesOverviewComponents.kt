@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -73,6 +74,7 @@ fun MovieCard(
 ) {
     Card(
         modifier = Modifier
+            .testTag("MovieCard")
             .fillMaxWidth()
             .height(200.dp)
             .clickable(
@@ -120,6 +122,7 @@ fun MovieCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconCard(
+                        testTag = "favourite_${moviesData.id}",
                         isSelected = moviesData.isFavourite,
                         imageVector = Icons.Outlined.FavoriteBorder,
                         selectedVector = Icons.Filled.Favorite,
@@ -128,6 +131,7 @@ fun MovieCard(
                         },
                     )
                     IconCard(
+                        testTag = "watchList_${moviesData.id}",
                         isSelected = moviesData.isWatched,
                         imageVector = Icons.Outlined.Theaters,
                         selectedVector = Icons.Filled.Theaters,
@@ -216,6 +220,7 @@ fun IconPreview() {
 
 @Composable
 fun IconCard(
+    testTag: String = "favourite",
     isSelected: Boolean,
     imageVector: ImageVector,
     selectedVector: ImageVector,
@@ -223,6 +228,7 @@ fun IconCard(
 ) {
     IconButton(
         modifier = Modifier
+            .testTag(testTag)
             .padding(2.dp)
             .border(
                 BorderStroke(1.dp, Color.White),

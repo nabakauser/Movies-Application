@@ -23,11 +23,11 @@ class MoviesRepository(
         return roomDao.getMovieList()
     }
 
-    suspend fun updateFavourites(movieId: String, isFavourite: Boolean){
+    suspend fun updateFavouritesToDb(movieId: String, isFavourite: Boolean){
         roomDao.updateFavouriteMovie(movieId,isFavourite)
     }
 
-    suspend fun updateWatchList(movieId: String, isWatched: Boolean){
+    suspend fun updateWatchListToDb(movieId: String, isWatched: Boolean){
         roomDao.updateWatchList(movieId,isWatched)
     }
 }

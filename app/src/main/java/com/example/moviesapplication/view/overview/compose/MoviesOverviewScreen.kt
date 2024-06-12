@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.moviesapplication.view.overview.MoviesData
@@ -67,6 +68,7 @@ fun MoviesOverviewScreen(
     ) {
         Column(
             modifier = Modifier
+                .testTag("moviesColumn")
                 .padding(it)
                 .background(Color.Black)
         ) {
@@ -97,7 +99,9 @@ fun MoviesOverviewScreen(
                 }
             } else {
                 Box(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .testTag("loadingIndicator")
+                        .fillMaxSize(),
                     contentAlignment = Alignment.Center,
                 ) {
                     CircularProgressIndicator()
